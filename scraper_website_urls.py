@@ -1,7 +1,18 @@
 #!/usr/bin/env python3
 """This script grabs all emails from the websites in local urls.txt document"""
 
-# import libraries
+# import firebase
+import firebase_admin
+from firebase_admin import credentials
+
+cred = credentials.Certificate('key.json')
+firebase_admin.initialize_app(cred, {
+    'databaseURL' : 'https://crypto-celebrities.firebaseio.com'
+})
+
+from firebase_admin import db
+
+#import other libraries
 import sys
 import time
 sys.path.insert(0, 'lib/')
@@ -34,21 +45,31 @@ def find_data(request):
             if "Price" not in str(span):
                 PRICES.append(span)
     i = 0
+    root = db.reference()
+    timestamp = str(time.time()).split('.')[0]
+    print (timestamp)
     while i < len(NAMES):
-        print (NAMES[i].replace(" ", "") + ', ' + PRICES[i])
+        name = NAMES[i]
+        name = name.replace(" ", "")
+        name = name.replace('$', 'S')
+        name = name.replace('.', '_')
+        price = PRICES[i]
+
+        # store into firebase
+        root.child('users/' + name + '/' + timestamp).set({"timestamp": timestamp, "price": price, "name": NAMES[i]})
         i += 1
 
 def request_url(url, page):
     request = urlopen(url).read()
     find_data(request)
     return page
-   
-page = 0
 
-print (time.time())
+while 1 == 1:   
+    page = 0
 
-while page < 20:
-    main_url = 'https://cryptocelebrities.co/marketplace/page/' + str(page) + '/?sort=all&by=lowest#038;by=lowest'
-    page = request_url(main_url, page)
-    time.sleep(1)
-    page += 1
+    while page < 20:
+        main_url = 'https://cryptocelebrities.co/marketplace/page/' + str(page) + '/?sort=all&by=lowest#038;by=lowest'
+        page = request_url(main_url, page)
+        time.sleep(1)
+        page += 1
+    time.sleep(100)
