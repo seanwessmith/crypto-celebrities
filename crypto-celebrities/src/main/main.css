@@ -1,0 +1,52 @@
+.header {
+  margin-top: 50px;
+  margin-bottom: 50px;
+  border-bottom: 1px solid #eaeaea;
+  background: #f5f5f5;
+  padding: 20px 0 0;
+  text-align: left;
+}
+
+.inner-header {
+  margin: 0 auto;
+  width: 920px;
+  padding: 0 10px;
+}
+
+.inner-header .logo {
+  width: 110px;
+  height: 88px;
+  display: inline-block;
+  padding-bottom: 50px;
+}
+
+.title {
+  font-weight: 300;
+  font-size: 18px;
+  display: inline-block;
+  margin-left: 25px;
+}
+
+h1 {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+  text-decoration: none;
+}
+
+.welcome-text {
+  color: #9faaad;
+  line-height: 20px;
+  padding: 5px 0;
+  font-size: 130%;
+  display: inline-block;
+}
+
+.table-container {
+  max-width: 1000px;
+  width: 90%;
+  margin: 0 auto;
+}

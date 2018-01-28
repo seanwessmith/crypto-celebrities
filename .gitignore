@@ -1,1 +1,5 @@
-keys.json
+*keys.json
+*.gitignore
+*firebase.json
+crypto-celebrities/package-lock.json
+*config.js

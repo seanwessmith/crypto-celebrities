@@ -5,9 +5,9 @@
 import firebase_admin
 from firebase_admin import credentials
 
-cred = credentials.Certificate('key.json')
+cred = credentials.Certificate('keys.json')
 firebase_admin.initialize_app(cred, {
-    'databaseURL' : 'https://crypto-celebrities.firebaseio.com'
+    'databaseURL' : 'https://crypto-celebrities-charts.firebaseio.com'
 })
 
 from firebase_admin import db
@@ -47,7 +47,7 @@ def find_data(request):
     i = 0
     root = db.reference()
     timestamp = str(time.time()).split('.')[0]
-    print (timestamp)
+    print ('there are ', len(NAMES), 'names.')
     while i < len(NAMES):
         name = NAMES[i]
         name = name.replace(" ", "")
@@ -59,17 +59,16 @@ def find_data(request):
         root.child('users/' + name + '/' + timestamp).set({"timestamp": timestamp, "price": price, "name": NAMES[i]})
         i += 1
 
-def request_url(url, page):
+def request_url(url):
     request = urlopen(url).read()
     find_data(request)
-    return page
 
 while 1 == 1:   
     page = 0
-
-    while page < 20:
-        main_url = 'https://cryptocelebrities.co/marketplace/page/' + str(page) + '/?sort=all&by=lowest#038;by=lowest'
-        page = request_url(main_url, page)
-        time.sleep(1)
+    print (str(time.time()).split('.')[0])
+    while page < 23:
+        main_url = 'https://cryptocelebrities.co/marketplace/page/' + str(page)
+        request_url(main_url)
+        print ('finished page # ', page)
         page += 1
     time.sleep(100)
