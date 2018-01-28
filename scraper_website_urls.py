@@ -71,4 +71,4 @@ while 1 == 1:
         request_url(main_url)
         print ('finished page # ', page)
         page += 1
-    time.sleep(100)
+    time.sleep(1000)

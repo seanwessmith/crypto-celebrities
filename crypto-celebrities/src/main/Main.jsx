@@ -15,93 +15,57 @@ class Main extends React.Component {
     this.state = {
       usersObj: [],
       sort: 'jalepeno',
-      sortDesc: true,
+      sortAsc: false,
       columns: [],
     }
   }
   componentWillMount() {
-    db.ref(`users/`).once('value')
-      .then((snap) => {
-        // this.setState({ users });
-        this.parseUsers(snap.val());
+    db.ref(`snapshot/`).once('value')
+      .then((returnVal) => {
+        const snapshot = returnVal.val();
+        const usersObj = [];
+
+        snapshot.forEach((snap) => {
+          usersObj.push(snap);
+        });
+
+        const columns = [{
+          title: <span style={{ cursor: 'pointer' }} onClick={() => this.sortSetter('name')}>Name</span>,
+          dataIndex: 'name',
+          key: 'name',
+        }, {
+          title: <span style={{ cursor: 'pointer' }} onClick={() => this.sortSetter('price')}>Price</span>,
+          dataIndex: 'price',
+          key: 'price',
+        },
+        {
+          title: (
+            <Tooltip title="How active trading has been for the last 24 hours">
+              <img onClick={() => this.sortSetter('jalepeno')} style={{ width: 35, cursor: 'pointer' }} src={jalepeno} />
+            </Tooltip>),
+          dataIndex: 'jalepeno',
+          key: 'jalepeno',
+        }];
+        this.setState({ usersObj, columns });
       });
-  }
-  getJalepenoLevel(celebrityData, name) {
-    // Object.keys(celebrityData).forEach((key) => {
-    //   console.log(key,': ', celebrityData[key]);
-    // });
-    const uniquePrices = [];
-    Object.keys(celebrityData).forEach((timestamp) => {
-      const currData = celebrityData[timestamp];
-      if (uniquePrices.indexOf(currData.price) === -1) {
-        uniquePrices.push({ price: currData.price, timestamp: currData.timestamp });
-      }
-    });
-    const currUnixTime = Date.now() / 1000;
-    let jalepenoLevel = 0;
-    uniquePrices.forEach((data) => {
-      if (data.timestamp > currUnixTime - 86400) {
-        jalepenoLevel += 1;
-      }
-    })
-    // console.log(name, jalepenoLevel);
-    return jalepenoLevel;
-  }
-  parseUsers(users) {
-    let keyVal = 0;
-    let usersObj = [];
-
-    Object.keys(users).forEach((name) => {
-      const userObj = { key: null, name: null, price: null };
-      const celebrityData = users[name];
-      const latestDate = Object.keys(celebrityData).reduce((a, b) => celebrityData[a] > celebrityData[b] ? a : b);
-      const latestCelebrityData = celebrityData[latestDate];
-      const jalepenoLevel = this.getJalepenoLevel(celebrityData, celebrityData[latestDate].name);
-
-      userObj.key = keyVal;
-      userObj.name = latestCelebrityData.name;
-      userObj.price = latestCelebrityData.price;
-      userObj.jalepeno = jalepenoLevel;
-      usersObj.push(userObj);
-      keyVal += 1;
-    });
-    usersObj.sort((a, b) => b.price - a.price);
-    const columns = [{
-      title: <span style={{ cursor: 'pointer' }} onClick={() => this.sortSetter('name')}>Name</span>,
-      dataIndex: 'name',
-      key: 'name',
-    }, {
-      title: <span style={{ cursor: 'pointer' }} onClick={() => this.sortSetter('price')}>Price</span>,
-      dataIndex: 'price',
-      key: 'price',
-    },
-    {
-      title: (
-        <Tooltip title="How active trading has been for the last 24 hours">
-          <img onClick={() => this.sortSetter('jalepeno')} style={{ width: 35, cursor: 'pointer' }} src={jalepeno} />
-        </Tooltip>),
-      dataIndex: 'jalepeno',
-      key: 'jalepeno',
-    }];
-    this.setState({ usersObj, columns });
   }
 
   sortSetter(type) {
-    const { sort, sortDesc } = this.state;
+    const { sort, sortAsc } = this.state;
 
     if (sort === type) {
-      this.setState({ sortDesc: !sortDesc });
+      this.setState({ sortAsc: !sortAsc });
     } else {
-      this.setState({ sort: type, sortDesc: true });
+      this.setState({ sort: type, sortAsc: true });
     }
   }
 
   sorter(usersObj) {
-    const { sortDesc, sort } = this.state;
+    const { sortAsc, sort } = this.state;
 
     if (sort === 'name') {
 
-      if (sortDesc) {
+      if (sortAsc) {
         return usersObj.sort((a, b) => {
           if (a.name < b.name) return -1;
           if (a.name > b.name) return 1;
@@ -116,11 +80,10 @@ class Main extends React.Component {
 
     } else {
 
-      if (sortDesc) {
+      if (sortAsc) {
         return usersObj.sort((a, b) => a[sort] - b[sort]);
       }
       return usersObj.sort((a, b) => b[sort] - a[sort]);
-
     }
   }
 
@@ -140,8 +103,11 @@ class Main extends React.Component {
             </div>
           </div>
         </div>
+        <div className="explanation">
+          <p><img style={{ width: 25 }} src={jalepeno} /> indicates how many times that celebrity has been traded in the last 24 hours.</p>
+        </div>
         <div className="table-container">
-          <Table dataSource={this.sorter(usersObj, sort)} columns={columns} />
+          <Table dataSource={this.sorter(usersObj)} columns={columns} />
         </div>
       </div>
     );
